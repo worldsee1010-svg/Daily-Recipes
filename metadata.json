@@ -1,0 +1,6 @@
+{
+  "name": "FamilyFeast - 節氣家庭三餐智慧推薦",
+  "description": "為您和您的家人量身訂製美味、健康、經濟實惠的三餐食譜。結合二十四節氣與當季當令食材，智能生成一鍵採買清單與專業烹飪建議，貼心照顧全家人的健康與荷包。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
