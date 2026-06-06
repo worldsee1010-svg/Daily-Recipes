@@ -17,7 +17,8 @@ import {
   Clock,
   Sparkles,
   HelpCircle,
-  X
+  X,
+  Calculator
 } from "lucide-react";
 import { 
   SOLAR_TERMS, 
@@ -34,6 +35,15 @@ export default function App() {
   const [dietType, setDietType] = useState<string>("均衡飲食");
   const [budgetLimit, setBudgetLimit] = useState<string>("經濟實惠");
   const [customWish, setCustomWish] = useState<string>("");
+  const [fontSizeLevel, setFontSizeLevel] = useState<"normal" | "large" | "extra">("normal");
+
+  // Dynamic font size classes for high readability Zoom Feature
+  const fSub = fontSizeLevel === "normal" ? "text-[10.5px]" : fontSizeLevel === "large" ? "text-[12.5px]" : "text-[14.5px]";
+  const fLabel = fontSizeLevel === "normal" ? "text-[9px]" : fontSizeLevel === "large" ? "text-[11px]" : "text-xs";
+  const fBody = fontSizeLevel === "normal" ? "text-xs" : fontSizeLevel === "large" ? "text-sm" : "text-base";
+  const fTitle = fontSizeLevel === "normal" ? "text-sm" : fontSizeLevel === "large" ? "text-base" : "text-lg";
+  const fHeading = fontSizeLevel === "normal" ? "text-xl" : fontSizeLevel === "large" ? "text-2xl" : "text-3xl";
+  const fCaption = fontSizeLevel === "normal" ? "text-[8.5px]" : fontSizeLevel === "large" ? "text-[10px]" : "text-xs";
 
   // Data states
   const [mealPlan, setMealPlan] = useState<MealPlanResponse>(INITIAL_MEAL_PLAN_MANGZHONG);
@@ -123,6 +133,13 @@ export default function App() {
   const toggleShoppingChecked = (index: number) => {
     const updated = [...shoppingList];
     updated[index].checked = !updated[index].checked;
+    setShoppingList(updated);
+  };
+
+  // Update item price in shopping list directly in inline inputs
+  const handleUpdateItemPrice = (index: number, newPrice: number) => {
+    const updated = [...shoppingList];
+    updated[index].estimatedPrice = Math.max(0, newPrice);
     setShoppingList(updated);
   };
 
@@ -277,23 +294,52 @@ export default function App() {
           </div>
         </div>
 
-        {/* Input Wish & Fetch actions */}
+        {/* Input Wish, Zoom controls, & Fetch actions */}
         <div className="flex items-center gap-3">
+          {/* 字體放大按鈕 Segmented Control */}
+          <div className="flex items-center bg-slate-100 border border-slate-200 p-0.5 rounded gap-0.5 shrink-0">
+            <span className="text-[9.5px] text-slate-500 font-extrabold px-1.5">字體</span>
+            <button 
+              id="font-size-normal-btn"
+              onClick={() => setFontSizeLevel("normal")}
+              className={`px-2 py-0.5 text-[10px] font-black rounded transition-all cursor-pointer ${fontSizeLevel === "normal" ? "bg-[#4A7C59] text-white shadow-xs" : "text-slate-600 hover:bg-slate-250 hover:text-slate-900"}`}
+              title="精緻標準字體"
+            >
+              標準
+            </button>
+            <button 
+              id="font-size-large-btn"
+              onClick={() => setFontSizeLevel("large")}
+              className={`px-2 py-0.5 text-[10px] font-black rounded transition-all cursor-pointer ${fontSizeLevel === "large" ? "bg-[#4A7C59] text-white shadow-xs" : "text-slate-600 hover:bg-slate-250 hover:text-slate-900"}`}
+              title="適度放大字體"
+            >
+              放大
+            </button>
+            <button 
+              id="font-size-extra-btn"
+              onClick={() => setFontSizeLevel("extra")}
+              className={`px-2 py-0.5 text-[10px] font-black rounded transition-all cursor-pointer ${fontSizeLevel === "extra" ? "bg-[#4A7C59] text-white shadow-xs" : "text-slate-600 hover:bg-slate-250 hover:text-slate-900"}`}
+              title="長輩精選特大字體"
+            >
+              特大
+            </button>
+          </div>
+
           <input 
             id="custom-wish-input"
             type="text"
-            placeholder="限定食材或偏好... 如：雞肉、不要辣"
+            placeholder="特別食材/不要辣..."
             value={customWish}
             onChange={(e) => setCustomWish(e.target.value)}
-            className="text-xs border border-slate-300 rounded px-2.5 py-1.5 w-40 bg-slate-50 focus:bg-white focus:outline-none focus:border-[#4A7C59] transition"
+            className="text-xs border border-slate-300 rounded px-2 py-1.5 w-32 bg-slate-50 focus:bg-white focus:outline-none focus:border-[#4A7C59] transition"
           />
           <button 
             id="generate-recipe-btn"
             onClick={handleGenerateRecipe}
-            className="px-4 py-1.5 bg-[#4A7C59] hover:bg-[#3b664a] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition cursor-pointer"
+            className="px-3 py-1.5 bg-[#4A7C59] hover:bg-[#3b664a] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1 transition cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>智能生成食譜</span>
+            <Sparkles className="w-3 h-3 text-amber-300" />
+            <span>自動推薦</span>
           </button>
         </div>
       </header>
@@ -433,37 +479,37 @@ export default function App() {
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-extrabold text-[#4A7C59] bg-[#E8F5E9] px-2.5 py-0.5 rounded-full">
+                  <span className={`font-extrabold text-[#4A7C59] bg-[#E8F5E9] px-2.5 py-0.5 rounded-full ${fCaption}`}>
                      當前查看 {activeMealType} 食譜
                   </span>
-                  <span className="text-[10px] font-mono text-slate-400">
+                  <span className={`font-mono text-slate-400 ${fCaption}`}>
                     適合：{peopleCount} 人份
                   </span>
                 </div>
-                <h2 className="text-xl font-black text-slate-800 mt-1 leading-tight">
+                <h2 className={`font-black text-slate-800 mt-1 leading-tight ${fHeading}`}>
                   {activeMealDetail.dishName}
                 </h2>
                 
                 {/* Visual Stats Row */}
                 <div className="flex gap-4 mt-3">
                   <div className="flex flex-col">
-                    <span className="text-[9px] text-slate-400 uppercase tracking-wider">備料+烹調時間</span>
-                    <span className="text-xs font-bold text-slate-700">
+                    <span className={`text-slate-400 uppercase tracking-wider ${fCaption}`}>備料+烹調時間</span>
+                    <span className={`font-bold text-slate-700 ${fBody}`}>
                       {activeMealDetail.prepTime} + {activeMealDetail.cookTime} 分鐘
                     </span>
                   </div>
                   <div className="h-6 w-px bg-slate-200 align-middle self-center"></div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] text-slate-400 uppercase tracking-wider">每人約需開支</span>
-                    <span className="text-xs font-bold text-slate-700">
+                    <span className={`text-slate-400 uppercase tracking-wider ${fCaption}`}>每人約需開支</span>
+                    <span className={`font-bold text-slate-705 ${fBody}`}>
                       NT$ {activeMealDetail.estimatedCostPerPerson} TWD
                     </span>
                   </div>
                   <div className="h-6 w-px bg-slate-200 align-middle self-center"></div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] text-slate-400 uppercase tracking-wider">全天熱量分配</span>
-                    <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                      約 {mealPlan.nutritionSummary.totalCalories} 卡 <span className="text-[9px] font-normal text-slate-400">/ 每日</span>
+                    <span className={`text-slate-400 uppercase tracking-wider ${fCaption}`}>全天熱量分配</span>
+                    <span className={`font-bold text-emerald-700 flex items-center gap-1 ${fBody}`}>
+                      約 {mealPlan.nutritionSummary.totalCalories} 卡 <span className={`font-normal text-slate-400 ${fCaption}`}>/ 每日</span>
                     </span>
                   </div>
                 </div>
@@ -482,11 +528,11 @@ export default function App() {
             {/* Match Seasonal Foods */}
             {activeMealDetail.keySeasonalIngredients && activeMealDetail.keySeasonalIngredients.length > 0 && (
               <div className="mt-3.5 flex items-center gap-2 flex-wrap">
-                <span className="text-[9px] font-extrabold text-amber-700 uppercase tracking-wider flex items-center gap-1 shrink-0">
+                <span className={`font-extrabold text-amber-705 uppercase tracking-wider flex items-center gap-1 shrink-0 ${fCaption}`}>
                   <Leaf className="w-3 h-3 text-amber-500" /> 當季明星主料:
                 </span>
                 {activeMealDetail.keySeasonalIngredients.map((item, idx) => (
-                  <span key={idx} className="text-[10px] font-bold text-slate-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                  <span key={idx} className={`font-bold text-slate-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100/50 ${fSub}`}>
                     {item}
                   </span>
                 ))}
@@ -500,15 +546,15 @@ export default function App() {
             {/* Left Side: Dynamic Ingredients Checklist */}
             <div className="flex flex-col h-full overflow-hidden border-r border-slate-100 pr-3.5 text-left">
               <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-2 shrink-0">
-                <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                <h4 className={`font-black uppercase tracking-wider text-slate-800 ${fTitle}`}>
                   所需食材總清單 ({peopleCount} 人份)
                 </h4>
-                <span className="text-[9px] text-slate-400 font-medium">包含家中基底調味</span>
+                <span className={`text-slate-400 font-medium ${fCaption}`}>包含家中基底調味</span>
               </div>
               
               <div className="flex-1 overflow-y-auto space-y-2 pr-1.5">
                 {activeMealDetail.ingredients && activeMealDetail.ingredients.map((ing, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-xs p-1 rounded hover:bg-slate-50 transition">
+                  <div key={idx} className="flex justify-between items-center p-1 rounded hover:bg-slate-50 transition">
                     <span className="flex items-center gap-1.5">
                       <span className={`w-1.5 h-1.5 rounded-full ${
                         ing.category === "蔬菜" ? "bg-green-500" :
@@ -516,9 +562,9 @@ export default function App() {
                         ing.category === "蛋奶/豆腐" ? "bg-yellow-400" :
                         ing.category === "五穀根莖" ? "bg-amber-700" : "bg-slate-400"
                       }`} title={ing.category}></span>
-                      <span className="text-slate-700 font-medium">{ing.name}</span>
+                      <span className={`text-slate-700 font-bold ${fBody}`}>{ing.name}</span>
                     </span>
-                    <span className="font-mono text-slate-500 font-semibold bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
+                    <span className={`font-mono text-slate-500 font-black bg-slate-100 px-1.5 py-0.5 rounded ${fSub}`}>
                       {ing.amount}
                     </span>
                   </div>
@@ -527,10 +573,10 @@ export default function App() {
 
               {/* Value added Tip Box */}
               <div className="bg-[#FFFCEB] p-2.5 rounded-lg border border-[#FDE68A] mt-2 shrink-0 text-left">
-                <p className="text-[10px] font-extrabold text-[#F57F17] flex items-center gap-1">
+                <p className={`font-extrabold text-[#F57F17] flex items-center gap-1 ${fSub}`}>
                   <span>💡 當季採買與保存指引</span>
                 </p>
-                <p className="text-[9px] text-amber-800 leading-normal mt-0.5">
+                <p className={`text-amber-850 leading-normal mt-0.5 ${fCaption}`}>
                   全家 {peopleCount} 人煮這餐預計能省下 {Math.round(peopleCount * 120)} 元外食開銷！食材可與其他兩餐共用，減少廚餘。
                 </p>
               </div>
@@ -539,10 +585,10 @@ export default function App() {
             {/* Right Side: Step-by-Step Interactive Guide */}
             <div className="flex flex-col h-full overflow-hidden text-left">
               <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-2 shrink-0">
-                <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                <h4 className={`font-black uppercase tracking-wider text-slate-850 ${fTitle}`}>
                   烹飪手作步驟明細
                 </h4>
-                <span className="text-[9px] text-[#4A7C59] font-medium">點擊可標記進度</span>
+                <span className={`text-[#4A7C59] font-bold ${fCaption}`}>點擊可標記進度</span>
               </div>
 
               <div className="flex-1 overflow-y-auto space-y-3.5 pr-1.5">
@@ -563,8 +609,8 @@ export default function App() {
                       }`}>
                         {idx + 1}
                       </span>
-                      <p className={`text-xs leading-relaxed transition ${
-                        isDone ? "line-through text-slate-400 decoration-emerald-700/50" : "text-slate-700 font-medium"
+                      <p className={`leading-relaxed transition ${fBody} ${
+                        isDone ? "line-through text-slate-400 decoration-emerald-700/50" : "text-slate-700 font-bold"
                       }`}>
                         {step}
                       </p>
@@ -587,27 +633,27 @@ export default function App() {
           </div>
         </section>
 
-        {/* RIGHT COLUMN: GROCERY & SEASONAL HIGH DENSITY PICKS */}
-        <section id="right-column" className="col-span-3 flex flex-col gap-3.5 h-full overflow-hidden">
+        {/* RIGHT COLUMN: GROCERY & FINANCIAL BUDGET DASHBOARD */}
+        <section id="right-column" className="col-span-3 flex flex-col gap-3 h-full overflow-hidden">
           
-          {/* Shopping Checklist Card */}
-          <div id="grocery-card" className="bg-white p-3.5 rounded-2xl border border-[#E1E5E0] shadow-xs flex flex-col h-[55%] overflow-hidden text-left">
-            <div className="flex justify-between items-center mb-3 shrink-0">
+          {/* Shopping Checklist Card - Optimized height to h-[43%] */}
+          <div id="grocery-card" className="bg-white p-3 rounded-2xl border border-[#E1E5E0] shadow-xs flex flex-col h-[42%] overflow-hidden text-left">
+            <div className="flex justify-between items-center mb-2 shrink-0">
               <div className="flex flex-col">
-                <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                <h4 className={`font-black uppercase tracking-wider text-slate-800 ${fTitle}`}>
                   超市合併採買清單
                 </h4>
-                <span className="text-[9px] text-[#4A7C59] font-semibold mt-0.5">
-                  全家 {peopleCount} 人份當令採買
+                <span className={`text-[#4A7C59] font-bold mt-0.5 ${fCaption}`}>
+                  全家 {peopleCount} 人份當令預算採買
                 </span>
               </div>
-              <span className="text-[10px] bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-full font-extrabold">
+              <span className={`bg-red-50 text-red-650 border border-red-100 px-2.5 py-0.5 rounded-full font-extrabold ${fCaption}`}>
                 未購 {shoppingList.filter(item => !item.checked).length} 項
               </span>
             </div>
 
             {/* Shopping List Scroll area */}
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
               {shoppingList.map((item, idx) => (
                 <div 
                   key={idx}
@@ -623,41 +669,66 @@ export default function App() {
                     className="rounded text-[#4A7C59] focus:ring-[#4A7C59] cursor-pointer"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className={`font-bold text-slate-800 text-[11px] truncate ${item.checked ? "line-through text-slate-400" : ""}`}>
+                    <p className={`font-bold text-slate-800 truncate ${fBody} ${item.checked ? "line-through text-slate-400" : ""}`}>
                       {item.name}
                     </p>
-                    <p className="text-[9px] text-slate-400 mt-0.5">
-                      {item.amount} • <span className="bg-slate-100 px-1 py-0.2 rounded text-slate-500 font-mono text-[8px]">{item.category}</span>
+                    <p className={`text-slate-400 mt-0.5 ${fCaption}`}>
+                      {item.amount} • <span className="bg-slate-100 px-1 py-0.2 rounded text-slate-500 font-mono font-bold">{item.category}</span>
                     </p>
                   </div>
-                  <span className="font-mono text-[10px] text-slate-500 font-bold shrink-0">
-                    ${item.estimatedPrice} TWD
-                  </span>
+                  <div className="flex items-center gap-1 shrink-0 bg-slate-50 border border-slate-200/80 px-1 py-0.5 rounded" onClick={(e) => e.stopPropagation()}>
+                    <span className="text-[9px] text-[#4A7C59] font-black">$</span>
+                    <input 
+                      type="number"
+                      value={item.estimatedPrice}
+                      onChange={(e) => handleUpdateItemPrice(idx, parseInt(e.target.value) || 0)}
+                      className="w-11 text-right bg-transparent text-[#4A7C59] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#4A7C59] rounded font-mono font-black text-xs p-0 border-0"
+                      title="輸入金額進行調整"
+                      min="0"
+                    />
+                    <span className="text-[10px] text-slate-500 font-bold">元</span>
+                  </div>
                 </div>
               ))}
             </div>
 
+            {/* Shopping List Progress & Totals Summary banner */}
+            <div className="bg-[#F4F9F4] border-t border-b border-emerald-100/60 px-2 py-1 shrink-0 flex justify-between items-center text-xs my-1">
+              <div className="flex gap-2">
+                <span className="text-slate-600 font-bold">
+                  預算總額: <span className="font-mono text-[#4A7C59] font-black">${totalGroceryBudget}</span> 元
+                </span>
+                <span className="text-slate-300 font-light">|</span>
+                <span className="text-slate-600 font-bold">
+                  已購額: <span className="font-mono text-emerald-700 font-black">${purchasedGroceryBudget}</span> 元
+                </span>
+              </div>
+              <span className="text-[9.5px] bg-[#4A7C59] text-white px-1 py-0.2 rounded font-black shrink-0">
+                {Math.round((shoppingList.filter(i => i.checked).length / Math.max(1, shoppingList.length)) * 100)}%
+              </span>
+            </div>
+
             {/* Add Custom grocery item form */}
-            <form onSubmit={handleAddGroceryItem} className="border-t border-slate-100 pt-2.5 mt-2.5 shrink-0">
-              <p className="text-[10px] text-slate-400 font-bold mb-1.5 uppercase">手動補充額外食材</p>
+            <form onSubmit={handleAddGroceryItem} className="border-t border-slate-100 pt-2.5 mt-2 shrink-0">
+              <p className={`text-slate-400 font-bold mb-1.5 uppercase ${fCaption}`}>手動補充額外食材</p>
               <div className="flex gap-1.5 items-center">
                 <input 
                   type="text" 
                   placeholder="品名, 如: 豆腐" 
                   value={newGroceryName}
                   onChange={(e) => setNewGroceryName(e.target.value)}
-                  className="text-[10px] border border-slate-300 rounded px-1.5 py-1 flex-1 focus:outline-none min-w-0 font-medium"
+                  className={`border border-slate-300 rounded px-1.5 py-1 flex-1 focus:outline-none min-w-0 font-medium ${fCaption}`}
                 />
                 <input 
                   type="number" 
                   placeholder="元" 
                   value={newGroceryPrice}
                   onChange={(e) => setNewGroceryPrice(e.target.value)}
-                  className="text-[10px] border border-slate-300 rounded px-1 py-1 w-10 text-center font-mono focus:outline-none"
+                  className={`border border-slate-300 rounded px-1 py-1 w-12 text-center font-mono focus:outline-none ${fCaption}`}
                 />
                 <button 
                   type="submit"
-                  className="p-1 bg-[#4A7C59] hover:bg-[#3d664a] text-white rounded transition text-[10px]"
+                  className="p-1.5 bg-[#4A7C59] hover:bg-[#3d664a] text-white rounded transition text-[10px]"
                   title="加入採買項"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -666,9 +737,77 @@ export default function App() {
             </form>
           </div>
 
-          {/* Seasonal Highlight Card (Remaining ~45%) */}
-          <div id="seasonal-highlight-card" className="bg-white p-3.5 rounded-xl border border-[#E1E5E0] shadow-xs flex-1 flex flex-col overflow-hidden text-left">
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-2 shrink-0">
+          {/* NEW MODULE: Household Meals Financial Budget Dashboard & Monthly Savings Summary (h-[30%]) */}
+          <div id="budget-dashboard" className="bg-white p-3 rounded-2xl border border-[#E1E5E0] shadow-xs flex flex-col h-[28%] overflow-hidden text-left bg-gradient-to-br from-white to-[#F4F9F4]/40">
+            <div className="flex justify-between items-center mb-1 shrink-0">
+              <div className="flex flex-col">
+                <h4 className={`font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5 ${fTitle}`}>
+                  <Calculator className="w-3.5 h-3.5 text-[#4A7C59]" />
+                  三餐伙食精算統計
+                </h4>
+                <p className={`text-slate-500 font-bold ${fCaption}`}>
+                  基於全家 {peopleCount} 人份，動態彙整加總
+                </p>
+              </div>
+              <span className={`bg-emerald-50 text-[#2E7D32] border border-emerald-105 px-2 py-0.5 rounded-full font-black ${fCaption}`}>
+                超值省錢
+              </span>
+            </div>
+
+            {/* Daily, Weekly, Monthly Aggregated Totals Grid */}
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-50 border border-slate-120 rounded-lg shrink-0 mt-1">
+              <div className="bg-white p-1 rounded border border-slate-100 flex flex-col justify-center text-center">
+                <span className={`text-slate-400 font-bold uppercase ${fCaption}`}>昨日+今日</span>
+                <span className={`font-black font-mono text-[#4A7C59] xl:text-sm mt-0.5 ${fTitle}`}>${totalCostEstimate}</span>
+                <span className={`text-slate-400 ${fCaption}`}>每日加總</span>
+              </div>
+              <div className="bg-white p-1 rounded border border-slate-100 flex flex-col justify-center text-center">
+                <span className={`text-slate-400 font-bold uppercase ${fCaption}`}>當週加總</span>
+                <span className={`font-black font-mono text-[#4A7C59] xl:text-sm mt-0.5 ${fTitle}`}>${totalCostEstimate * 7}</span>
+                <span className={`text-slate-400 ${fCaption}`}>每週伙食</span>
+              </div>
+              <div className="bg-emerald-50/50 p-1 rounded border border-emerald-100 flex flex-col justify-center text-center">
+                <span className={`text-emerald-700 font-extrabold uppercase ${fCaption}`}>下月預估</span>
+                <span className={`font-black font-mono text-emerald-800 xl:text-sm mt-0.5 ${fTitle}`}>${totalCostEstimate * 30}</span>
+                <span className={`text-emerald-700 font-bold ${fCaption}`}>每月加總</span>
+              </div>
+            </div>
+
+            {/* Smart saving visualizer comparing home-cooked vs restaurant dining out */}
+            <div className="mt-1.5 bg-[#FAFDF9] rounded-lg p-2 border border-emerald-100 flex-1 flex flex-col gap-1 justify-center shrink-0">
+              <div className="flex justify-between items-center border-b border-dashed border-emerald-100/50 pb-1">
+                <span className={`text-slate-600 font-bold flex items-center gap-1 ${fCaption}`}>
+                  <ShoppingBag className="w-3 h-3 text-[#4A7C59]" />
+                  目前採買總額：
+                </span>
+                <span className={`font-mono font-black text-[#4A7C59] ${fBody}`}>
+                  ${totalGroceryBudget} 元
+                </span>
+              </div>
+              <div className="flex justify-between items-center border-b border-dashed border-emerald-100/50 pb-1">
+                <span className={`text-slate-700 font-extrabold flex items-center gap-1 ${fCaption}`}>
+                  <Calculator className="w-3 h-3 text-[#2E7D32]" />
+                  一週的總消費金額 (三餐+採買)：
+                </span>
+                <span className={`font-mono font-black text-[#2E7D32] ${fBody}`}>
+                  ${(totalCostEstimate * 7) + totalGroceryBudget} 元
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className={`text-slate-500 font-bold flex items-center gap-1 ${fCaption}`}>
+                  <TrendingDown className="w-3 h-3 text-rose-600 shrink-0" />
+                  外食按餐$180/人，本週省：
+                </span>
+                <span className={`font-mono font-black text-rose-600 ${fBody}`}>
+                  +${Math.max(0, (180 * 3 * peopleCount * 7) - ((totalCostEstimate * 7) + totalGroceryBudget))} 元
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Seasonal Highlight Card (Remaining ~30% height) */}
+          <div id="seasonal-highlight-card" className="bg-white p-3 rounded-2xl border border-[#E1E5E0] shadow-xs flex-1 flex flex-col overflow-hidden text-left">
+            <h4 className={`font-black uppercase tracking-wider text-slate-800 mb-2 shrink-0 ${fTitle}`}>
               節氣鮮推薦 / Seasonal Best
             </h4>
             
@@ -677,11 +816,11 @@ export default function App() {
               {currentTermObj.desc ? (
                 // Selected term's ingredients list from mealPlan solar info
                 mealPlan.solarTermInfo.recommendedIngredients.slice(0, 4).map((ingredient, idx) => (
-                  <div key={idx} className="p-2 bg-emerald-50/50 rounded-lg border border-emerald-100 flex flex-col items-center justify-center">
-                    <span className="text-xs font-black text-slate-800 text-center">
+                  <div key={idx} className="p-1.5 bg-emerald-50/40 rounded-lg border border-emerald-100 flex flex-col items-center justify-center">
+                    <span className={`font-black text-slate-800 text-center ${fBody}`}>
                       {ingredient}
                     </span>
-                    <span className="text-[8.5px] font-bold text-[#4A7C59] bg-emerald-100/50 px-1.5 py-0.2 rounded mt-1">
+                    <span className={`font-extrabold text-[#4A7C59] bg-emerald-100/40 px-1.5 py-0.2 rounded mt-0.5 ${fCaption}`}>
                       當季最爽口
                     </span>
                   </div>
@@ -693,10 +832,10 @@ export default function App() {
               )}
             </div>
 
-            <div className="mt-2 text-[9px] text-[#2E7D32] bg-emerald-50 px-2 py-1.5 border border-emerald-100/50 rounded leading-tight font-medium shrink-0 flex items-start gap-1">
+            <div className={`mt-2 text-[#2E7D32] bg-emerald-50/70 px-2 py-1.5 border border-emerald-100/50 rounded leading-snug font-medium shrink-0 flex items-start gap-1 ${fCaption}`}>
               <TrendingDown className="w-3 h-3 text-[#2E7D32] shrink-0 mt-0.5" />
               <span>
-                <b>當週採買技巧</b>：當季的食材產量最大、價格約比非當季便宜 40%，且營養成分最為飽足：少食冰冷、宜多食瓜。
+                <b>當週採買技巧</b>：當季的食材產量最大、價格便宜約 40%，且營養最充足：少食冰冷、宜多食瓜。
               </span>
             </div>
           </div>
